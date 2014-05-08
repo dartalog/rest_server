@@ -7,13 +7,13 @@ class RestResource {
   RegExp _regex;
 
 
-  Map<String, ARestEventHandler> _handlers = new Map<String, ARestEventHandler>();
+  Map<String, RestResourceMethod> _handlers = new Map<String, RestResourceMethod>();
 
   RestResource(String regex) {
     _regex = new RegExp(regex);
   }
 
-  void SetHandlerResource(String method, ARestEventHandler handler) {
+  void SetMethodHandler(String method, RestResourceMethod handler) {
     this._handlers[method] = handler;
   }
 
@@ -43,7 +43,7 @@ class RestResource {
         throw new RestException(405, "The method " + request.method + " is not allowed for this resource");
       }
 
-      return this._handlers[request.method].Trigger(type, path, request.uri.queryParameters).then((result) {
+      return this._handlers[request.method](type, path, request.uri.queryParameters).then((result) {
         if (result == null) {
           return "";
         } else {

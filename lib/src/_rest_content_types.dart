@@ -1,6 +1,6 @@
 part of rest;
 
-class RestContentTypes {
+class _RestContentTypes {
   List<ContentType> _ContentTypes = new List<ContentType>();
   ContentType _Default = null;
 

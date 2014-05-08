@@ -3,12 +3,12 @@ part of rest;
 class RestServer {
   List<RestResource> _resources = new List<RestResource>();
 
-  final Logger log = new Logger('RestServer');
+  final Logger _log = new Logger('RestServer');
 
-  RestContentTypes _AvailableContentTypes = new RestContentTypes();
+  _RestContentTypes _AvailableContentTypes = new _RestContentTypes();
 
   RestServer() {
-    log.info("Rest server instance created");
+    this._log.info("Rest server instance created");
   }
 
   void Start([InternetAddress address = null, int port = 8080]) {
@@ -18,7 +18,7 @@ class RestServer {
     }
 
     HttpServer.bind(address, port).then((server) {
-      log.info("Serving at ${server.address}:${server.port}");
+      this._log.info("Serving at ${server.address}:${server.port}");
       server.listen(AnswerRequest);
     });
 
@@ -53,7 +53,7 @@ class RestServer {
         output.write(data);
       }
     }).catchError((e, st) {
-      log.severe(e.toString(), e, st);
+      this._log.severe(e.toString(), e, st);
       output.write(this._ProcessError(request.response, e, st));
     }).whenComplete(() {
       // Last chance to write a header, so we write the processing time

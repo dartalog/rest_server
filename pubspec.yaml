@@ -1,5 +1,5 @@
 name: rest_dart
-version: 0.1.0
+version: 0.1.1
 author: Matthew Barbour <sanmadjack@gmail.com>
 description: A library for automating much of the minutia of creating a rest interface
 homepage: https://github.com/sanmadjack/rest_dart
