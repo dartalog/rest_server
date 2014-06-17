@@ -33,23 +33,36 @@ class RestResource {
     response.headers.add("Access-Control-Allow-Methods", methods.toString());
   }
 
-  Future<String> Trigger(HttpRequest request, ContentType type, String path) {
+  Future<String> Trigger(RestRequest request) {
     return new Future.sync(() {
-      this._SendAllowedMethods(request.response);
-      if (request.method == HTTP_OPTIONS) {
+      this._SendAllowedMethods(request.httpRequest.response);
+      if (request.httpRequest.method == HTTP_OPTIONS) {
         return null;
       }
-      if (!this._handlers.containsKey(request.method)) {
-        throw new RestException(405, "The method " + request.method + " is not allowed for this resource");
+     
+      if (!this._handlers.containsKey(request.httpRequest.method)) {
+        throw new RestException(HttpStatus.METHOD_NOT_ALLOWED, "The method " + request.httpRequest.method + " is not allowed for this resource");
       }
 
-      return this._handlers[request.method](type, path, request.uri.queryParameters).then((result) {
-        if (result == null) {
-          return "";
-        } else {
-          return result.toString();
-        }
-      });
+      if(request.httpRequest.method == HTTP_POST) {
+        return request.loadData().then((_) {
+          return _Trigger(request);
+        });
+      } else {
+        return _Trigger(request);
+      }
+
+      
+    });
+  }
+  
+  Future<String> _Trigger(RestRequest request) {
+    return this._handlers[request.httpRequest.method](request).then((result) {
+      if (result == null) {
+        return "";
+      } else {
+        return result.toString();
+      }
     });
   }
 }
