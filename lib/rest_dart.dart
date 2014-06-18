@@ -20,4 +20,6 @@ const HTTP_POST = "POST";
 const HTTP_OPTIONS = "OPTIONS";
 
 
-typedef Future RestResourceMethod(RestRequest request);
+typedef Future RestResourceMethodHandler(RestRequest request);
+typedef Future<List<ContentType>> ManualAvailableContentTypes(RestRequest request);
+typedef Future<List<ContentType>> ManualAcceptableContentTypes(RestRequest request);

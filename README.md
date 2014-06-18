@@ -5,10 +5,11 @@ A library for automating much of the minutia of creating a rest interface.
 This mostly means automatically sending the correct error messages when a 
 request is invalid, and some automatic header handling, such as:
 
-- Automatic 204 messages when a resource returns no data but is still succesful
+- Automatic 204 messages when a resource returns no data but is still succesful.
 - Automatic 404 messages when a requested resource does not exist.
 - Automatic 405 errors when a method is not valid for a resource.
-- Automatic 406 errors when requested content type is not available (currently handled globally), or is not a valid content type.
+- Automatic 406 errors when requested content type is not available, or is not a valid content type.
+- Automatic 415 errors when a submitted content type is not supported, or is not a valid content type.
 - Automatic handling of the OPTIONS method, and automatic Allow header generation.
 - Automatic setting of content-length and contnt-type headers.
 - Provides a custom x-processing-time header that automatically contains how long it took for the server to generate a response.
@@ -16,10 +17,12 @@ request is invalid, and some automatic header handling, such as:
 ###TODO:
 
 - The error handling outputs the errors as JSON. This needs to be more flexible, and overridable.
-- Per-resource content type support.
 - Add support for variable URL prefixes. Currently assumes running right under the host name/ip.
 - Change rest event handlers to be generic functions instead of classes.
 - Sets VERY generous Access-Control-Allow-Origin and Access-Control-Allow-Methods to allow cross-domain testing (this will be chagned to be mroe secure in the future).
+- Per-resource/method content typing.
+
+
 
 ###Usage!
 

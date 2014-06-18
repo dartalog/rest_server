@@ -5,7 +5,7 @@ class RestServer {
 
   final Logger _log = new Logger('RestServer');
 
-  _RestContentTypes _AvailableContentTypes = new _RestContentTypes();
+  _RestContentTypes _ContentTypes = new _RestContentTypes();
 
   RestServer() {
     this._log.info("Rest server instance created");
@@ -24,14 +24,19 @@ class RestServer {
 
   }
 
-  void AddDefaultContentType(ContentType type) {
-    this._AvailableContentTypes.AddDefaultContentType(type);
+  void addDefaultAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
+    this._ContentTypes.addDefaultAvailableContentType(type, method);
   }
 
-  void AddContentType(ContentType type) {
-    this._AvailableContentTypes.AddContentType(type);
+  void addAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
+    this._ContentTypes.addAvailableContentType(type, method);
   }
-
+  
+  void addAcceptableContentType(ContentType type, [String method = "GLOBAL"]) {
+    this._ContentTypes.addAcceptableContentType(type, method);
+  }
+  
+  
   void AddResource(RestResource resource) {
     this._resources.add(resource);
   }
@@ -40,15 +45,24 @@ class RestServer {
     Stopwatch stopwatch = new Stopwatch()..start();
     StringBuffer output = new StringBuffer();
     Future fut = new Future.sync(() {
-      http_request.response.headers.contentType = this._AvailableContentTypes.GetRequestedContentType(http_request);
       RestRequest request = new RestRequest(http_request);
       
       for (RestResource resource in this._resources) {
         if (resource.Matches(http_request.uri.path)) {
+          if(resource.ContentTypeCount>0) {
+            http_request.response.headers.contentType = resource.DetermineCorrectContentType(http_request);
+          } else { 
+            http_request.response.headers.contentType = this._AvailableContentTypes.GetRequestedContentType(http_request);
+          }
+          
           return resource.Trigger(request);
         }
       }
-      throw new RestException(404, "The requested resource was not found");
+      
+      
+
+      
+      throw new RestException(HttpStatus.NOT_FOUND, "The requested resource was not found");
     }).then((data) {
       if (data != null) {
         output.write(data);
@@ -61,7 +75,7 @@ class RestServer {
       http_request.response.headers.add("X-Processing-Time", stopwatch.elapsed.toString());
       http_request.response.headers.add("Access-Control-Allow-Origin", "*");
       if (output.length == 0) { // If the content length is 0, and if the current status code is 200, then we send a 204
-        if (http_request.response.statusCode ==  200) {
+        if (http_request.response.statusCode ==  HttpStatus.OK) {
           http_request.response.statusCode = HttpStatus.NO_CONTENT;
         }
       } else {

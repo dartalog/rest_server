@@ -7,13 +7,50 @@ class RestResource {
   RegExp _regex;
 
 
-  Map<String, RestResourceMethod> _handlers = new Map<String, RestResourceMethod>();
+  Map<String, RestResourceMethodHandler> _handlers = new Map<String, RestResourceMethodHandler>();
+  
+  // BEGIN Content Type handlers
+  bool ignoreGlobalContentTypes = false;
+  Map<String,List<ContentType>> _AvailableContentTypes = new Map<String,List<ContentType>>();
+  Map<String,List<ContentType>> _AcceptableContentTypes = new Map<String,List<ContentType>>();
+  Map<String,ContentType> _DefaultAvailable = null;
+  
+  ManualAvailableContentTypes manualAvailableContentTypes = null;
+  ManualAcceptableContentTypes manualAcceptableContentTypes = null;
+  
+  void addDefaultAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
+    this._DefaultAvailable[method] = type;
+    this.addAvailableContentType(type,method);
+  }
 
+  void addAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
+    if(!this._AvailableContentTypes.containsKey(method)) {
+      this._AvailableContentTypes[method] = new List<ContentType>();
+    }
+    
+    if (!this._AvailableContentTypes[method].contains(type)) {
+      this._AvailableContentTypes[method].add(type);
+    }
+  }
+  
+  void addAcceptableContentType(ContentType type, [String method = "GLOBAL"]) {
+    if(!this._AcceptableContentTypes.containsKey(method)) {
+      this._AcceptableContentTypes[method] = new List<ContentType>();
+    }
+    
+    if (!this._AcceptableContentTypes[method].contains(type)) {
+      this._AcceptableContentTypes[method].add(type);
+    }
+  }
+  
+  // END Content Type handlers
+  
+  
   RestResource(String regex) {
     _regex = new RegExp(regex);
   }
 
-  void SetMethodHandler(String method, RestResourceMethod handler) {
+  void SetMethodHandler(String method, RestResourceMethodHandler handler) {
     this._handlers[method] = handler;
   }
 
@@ -33,6 +70,7 @@ class RestResource {
     response.headers.add("Access-Control-Allow-Methods", methods.toString());
   }
 
+  
   Future<String> Trigger(RestRequest request) {
     return new Future.sync(() {
       this._SendAllowedMethods(request.httpRequest.response);
@@ -43,7 +81,7 @@ class RestResource {
       if (!this._handlers.containsKey(request.httpRequest.method)) {
         throw new RestException(HttpStatus.METHOD_NOT_ALLOWED, "The method " + request.httpRequest.method + " is not allowed for this resource");
       }
-
+      
       if(request.httpRequest.method == HTTP_POST) {
         return request.loadData().then((_) {
           return _Trigger(request);

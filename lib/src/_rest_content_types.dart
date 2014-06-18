@@ -1,29 +1,47 @@
 part of rest;
 
 class _RestContentTypes {
-  List<ContentType> _ContentTypes = new List<ContentType>();
-  ContentType _Default = null;
+  Map<String,List<ContentType>> _AvailableContentTypes = new Map<String,List<ContentType>>();
+  Map<String,List<ContentType>> _AcceptableContentTypes = new Map<String,List<ContentType>>();
+  Map<String,ContentType> _DefaultAvailable = null;
 
 
-  void AddDefaultContentType(ContentType type) {
-    this._Default = type;
-    this.AddContentType(type);
+  void addDefaultAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
+    this._DefaultAvailable[method] = type;
+    this.addAvailableContentType(type,method);
   }
 
-  void AddContentType(ContentType type) {
-    if (!this._ContentTypes.contains(type)) {
-      this._ContentTypes.add(type);
+  void addAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
+    if(!this._AvailableContentTypes.containsKey(method)) {
+      this._AvailableContentTypes[method] = new List<ContentType>();
+    }
+    
+    if (!this._AvailableContentTypes[method].contains(type)) {
+      this._AvailableContentTypes[method].add(type);
     }
   }
+  
+  void addAcceptableContentType(ContentType type, [String method = "GLOBAL"]) {
+    if(!this._AcceptableContentTypes.containsKey(method)) {
+      this._AcceptableContentTypes[method] = new List<ContentType>();
+    }
+    
+    if (!this._AcceptableContentTypes[method].contains(type)) {
+      this._AcceptableContentTypes[method].add(type);
+    }
+  }
+  
+  ManualAvailableContentTypes manualAvailableContentTypes = null;
+  ManualAcceptableContentTypes manualAcceptableContentTypes = null;
 
-
-  ContentType GetRequestedContentType(HttpRequest request) {
-
-    if (this._Default == null) {
-      throw new RestException(500, "No default content type configured");
+  
+  void handleContentTypes(HttpRequest request, RestResource resource) {
+    
+    if (resource._DefaultAvailableContentType == null && this._Default == null) {
+      throw new RestException(HttpStatus.INTERNAL_SERVER_ERROR, "No default content type configured");
     }
     if (this._ContentTypes.length == 0) {
-      throw new RestException(500, "No content types configured");
+      throw new RestException(HttpStatus.INTERNAL_SERVER_ERROR, "No content types configured");
     }
 
 
@@ -43,9 +61,9 @@ class _RestContentTypes {
           }
         }
       } catch (e, st) {
-        throw new RestException(406, "Invalid content type specified in Accept request header", e);
+        throw new RestException(HttpStatus.NOT_ACCEPTABLE, "Invalid content type specified in Accept request header", e);
       }
-      throw new RestException(406, "Requested content type(s) not supported");
+      throw new RestException(HttpStatus.NOT_ACCEPTABLE, "Requested content type(s) not supported");
     } else {
       return this._Default;
     }
