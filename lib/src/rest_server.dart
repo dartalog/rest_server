@@ -5,13 +5,14 @@ class RestServer {
 
   final Logger _log = new Logger('RestServer');
 
-  _RestContentTypes _ContentTypes = new _RestContentTypes();
+  _RestContentTypes _contentTypes = new _RestContentTypes();
+  
 
   RestServer() {
     this._log.info("Rest server instance created");
   }
 
-  void Start([InternetAddress address = null, int port = 8080]) {
+  void start([InternetAddress address = null, int port = 8080]) {
 
     if (address == null) {
       address = InternetAddress.LOOPBACK_IP_V4;
@@ -37,31 +38,24 @@ class RestServer {
   }
   
   
-  void AddResource(RestResource resource) {
+  void addResource(RestResource resource) {
     this._resources.add(resource);
+    resource._server = this;
   }
 
   void _AnswerRequest(HttpRequest http_request) {
     Stopwatch stopwatch = new Stopwatch()..start();
     StringBuffer output = new StringBuffer();
     Future fut = new Future.sync(() {
-      RestRequest request = new RestRequest(http_request);
+      RestRequest request = new RestRequest(server, http_request);
       
       for (RestResource resource in this._resources) {
         if (resource.Matches(http_request.uri.path)) {
-          if(resource.ContentTypeCount>0) {
-            http_request.response.headers.contentType = resource.DetermineCorrectContentType(http_request);
-          } else { 
-            http_request.response.headers.contentType = this._AvailableContentTypes.GetRequestedContentType(http_request);
-          }
+          
           
           return resource.Trigger(request);
         }
       }
-      
-      
-
-      
       throw new RestException(HttpStatus.NOT_FOUND, "The requested resource was not found");
     }).then((data) {
       if (data != null) {
@@ -69,7 +63,7 @@ class RestServer {
       }
     }).catchError((e, st) {
       this._log.severe(e.toString(), e, st);
-      output.write(this._ProcessError(http_request.response, e, st));
+      output.write(this._processError(http_request.response, e, st));
     }).whenComplete(() {
       // Last chance to write a header, so we write the processing time
       http_request.response.headers.add("X-Processing-Time", stopwatch.elapsed.toString());
@@ -87,7 +81,7 @@ class RestServer {
     });
   }
 
-  String _ProcessError(HttpResponse response, Object e, [StackTrace st = null]) {
+  String _processError(HttpResponse response, Object e, [StackTrace st = null]) {
     Map<String, Object> output = new Map<String, Object>();
 
     output["message"] = e.toString();
@@ -103,6 +97,10 @@ class RestServer {
     }
 
     return JSON.encode(output);
+  }
+  
+  Future determineContentType() {
+    
   }
 
 }

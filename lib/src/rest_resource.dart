@@ -2,44 +2,47 @@ part of rest;
 
 class RestResource {
 
-  String Method;
+  String method;
 
   RegExp _regex;
 
+  RestServer _server;
 
   Map<String, RestResourceMethodHandler> _handlers = new Map<String, RestResourceMethodHandler>();
   
   // BEGIN Content Type handlers
   bool ignoreGlobalContentTypes = false;
-  Map<String,List<ContentType>> _AvailableContentTypes = new Map<String,List<ContentType>>();
-  Map<String,List<ContentType>> _AcceptableContentTypes = new Map<String,List<ContentType>>();
-  Map<String,ContentType> _DefaultAvailable = null;
+  
+  
+  Map<String,List<ContentType>> _availableContentTypes = new Map<String,List<ContentType>>();
+  Map<String,List<ContentType>> _acceptableContentTypes = new Map<String,List<ContentType>>();
+  Map<String,ContentType> _defaultAvailable = null;
   
   ManualAvailableContentTypes manualAvailableContentTypes = null;
   ManualAcceptableContentTypes manualAcceptableContentTypes = null;
   
   void addDefaultAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
-    this._DefaultAvailable[method] = type;
+    this._defaultAvailable[method] = type;
     this.addAvailableContentType(type,method);
   }
 
   void addAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
-    if(!this._AvailableContentTypes.containsKey(method)) {
-      this._AvailableContentTypes[method] = new List<ContentType>();
+    if(!this._availableContentTypes.containsKey(method)) {
+      this._availableContentTypes[method] = new List<ContentType>();
     }
     
-    if (!this._AvailableContentTypes[method].contains(type)) {
-      this._AvailableContentTypes[method].add(type);
+    if (!this._availableContentTypes[method].contains(type)) {
+      this._availableContentTypes[method].add(type);
     }
   }
   
   void addAcceptableContentType(ContentType type, [String method = "GLOBAL"]) {
-    if(!this._AcceptableContentTypes.containsKey(method)) {
-      this._AcceptableContentTypes[method] = new List<ContentType>();
+    if(!this._acceptableContentTypes.containsKey(method)) {
+      this._acceptableContentTypes[method] = new List<ContentType>();
     }
     
-    if (!this._AcceptableContentTypes[method].contains(type)) {
-      this._AcceptableContentTypes[method].add(type);
+    if (!this._acceptableContentTypes[method].contains(type)) {
+      this._acceptableContentTypes[method].add(type);
     }
   }
   
@@ -50,15 +53,15 @@ class RestResource {
     _regex = new RegExp(regex);
   }
 
-  void SetMethodHandler(String method, RestResourceMethodHandler handler) {
+  void setMethodHandler(String method, RestResourceMethodHandler handler) {
     this._handlers[method] = handler;
   }
 
-  bool Matches(String resource) {
+  bool _matches(String resource) {
     return this._regex.hasMatch(resource);
   }
 
-  void _SendAllowedMethods(HttpResponse response) {
+  void _sendAllowedMethods(HttpResponse response) {
     StringBuffer methods = new StringBuffer();
     methods.write("OPTIONS");
     for (String method in this._handlers.keys) {
@@ -71,7 +74,11 @@ class RestResource {
   }
 
   
-  Future<String> Trigger(RestRequest request) {
+  Future _processHeaders(RestRequest request) {
+    
+  }
+  
+  Future<String> _trigger(RestRequest request) {
     return new Future.sync(() {
       this._SendAllowedMethods(request.httpRequest.response);
       if (request.httpRequest.method == HTTP_OPTIONS) {
@@ -82,25 +89,16 @@ class RestResource {
         throw new RestException(HttpStatus.METHOD_NOT_ALLOWED, "The method " + request.httpRequest.method + " is not allowed for this resource");
       }
       
-      if(request.httpRequest.method == HTTP_POST) {
-        return request.loadData().then((_) {
-          return _Trigger(request);
+      return request.loadData().then((_) {
+        return this._handlers[request.httpRequest.method](request).then((result) {
+          if (result == null) {
+            return "";
+          } else {
+            return result.toString();
+          }
         });
-      } else {
-        return _Trigger(request);
-      }
-
-      
+      });
     });
   }
   
-  Future<String> _Trigger(RestRequest request) {
-    return this._handlers[request.httpRequest.method](request).then((result) {
-      if (result == null) {
-        return "";
-      } else {
-        return result.toString();
-      }
-    });
-  }
 }

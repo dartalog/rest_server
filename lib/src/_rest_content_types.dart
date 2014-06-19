@@ -37,6 +37,8 @@ class _RestContentTypes {
   
   void handleContentTypes(HttpRequest request, RestResource resource) {
     
+    
+    
     if (resource._DefaultAvailableContentType == null && this._Default == null) {
       throw new RestException(HttpStatus.INTERNAL_SERVER_ERROR, "No default content type configured");
     }
@@ -65,11 +67,14 @@ class _RestContentTypes {
       }
       throw new RestException(HttpStatus.NOT_ACCEPTABLE, "Requested content type(s) not supported");
     } else {
+      if()
+      
       return this._Default;
     }
   }
 
 
+  
   ContentType _MatchContentType(ContentType req_ct) {
     if (req_ct.primaryType == "*" && req_ct.subType == "*") {
       return this._Default;
