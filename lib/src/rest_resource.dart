@@ -1,6 +1,6 @@
 part of rest;
 
-class RestResource {
+class RestResource extends _ARestContentTypeNegotiator {
 
   String method;
 
@@ -9,45 +9,6 @@ class RestResource {
   RestServer _server;
 
   Map<String, RestResourceMethodHandler> _handlers = new Map<String, RestResourceMethodHandler>();
-  
-  // BEGIN Content Type handlers
-  bool ignoreGlobalContentTypes = false;
-  
-  
-  Map<String,List<ContentType>> _availableContentTypes = new Map<String,List<ContentType>>();
-  Map<String,List<ContentType>> _acceptableContentTypes = new Map<String,List<ContentType>>();
-  Map<String,ContentType> _defaultAvailable = null;
-  
-  ManualAvailableContentTypes manualAvailableContentTypes = null;
-  ManualAcceptableContentTypes manualAcceptableContentTypes = null;
-  
-  void addDefaultAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
-    this._defaultAvailable[method] = type;
-    this.addAvailableContentType(type,method);
-  }
-
-  void addAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
-    if(!this._availableContentTypes.containsKey(method)) {
-      this._availableContentTypes[method] = new List<ContentType>();
-    }
-    
-    if (!this._availableContentTypes[method].contains(type)) {
-      this._availableContentTypes[method].add(type);
-    }
-  }
-  
-  void addAcceptableContentType(ContentType type, [String method = "GLOBAL"]) {
-    if(!this._acceptableContentTypes.containsKey(method)) {
-      this._acceptableContentTypes[method] = new List<ContentType>();
-    }
-    
-    if (!this._acceptableContentTypes[method].contains(type)) {
-      this._acceptableContentTypes[method].add(type);
-    }
-  }
-  
-  // END Content Type handlers
-  
   
   RestResource(String regex) {
     _regex = new RegExp(regex);
@@ -75,12 +36,14 @@ class RestResource {
 
   
   Future _processHeaders(RestRequest request) {
-    
+    return new Future.sync(() {
+      
+    });
   }
   
   Future<String> _trigger(RestRequest request) {
     return new Future.sync(() {
-      this._SendAllowedMethods(request.httpRequest.response);
+      this._sendAllowedMethods(request.httpRequest.response);
       if (request.httpRequest.method == HTTP_OPTIONS) {
         return null;
       }

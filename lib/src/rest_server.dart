@@ -1,12 +1,9 @@
 part of rest;
 
-class RestServer {
+class RestServer extends _ARestContentTypeNegotiator {
   List<RestResource> _resources = new List<RestResource>();
 
   final Logger _log = new Logger('RestServer');
-
-  _RestContentTypes _contentTypes = new _RestContentTypes();
-  
 
   RestServer() {
     this._log.info("Rest server instance created");
@@ -22,21 +19,7 @@ class RestServer {
       this._log.info("Serving at ${server.address}:${server.port}");
       server.listen(_AnswerRequest);
     });
-
   }
-
-  void addDefaultAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
-    this._ContentTypes.addDefaultAvailableContentType(type, method);
-  }
-
-  void addAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
-    this._ContentTypes.addAvailableContentType(type, method);
-  }
-  
-  void addAcceptableContentType(ContentType type, [String method = "GLOBAL"]) {
-    this._ContentTypes.addAcceptableContentType(type, method);
-  }
-  
   
   void addResource(RestResource resource) {
     this._resources.add(resource);
@@ -47,13 +30,11 @@ class RestServer {
     Stopwatch stopwatch = new Stopwatch()..start();
     StringBuffer output = new StringBuffer();
     Future fut = new Future.sync(() {
-      RestRequest request = new RestRequest(server, http_request);
+      RestRequest request = new RestRequest(this,http_request);
       
       for (RestResource resource in this._resources) {
-        if (resource.Matches(http_request.uri.path)) {
-          
-          
-          return resource.Trigger(request);
+        if (resource._matches(http_request.uri.path)) {
+          return resource._trigger(request);
         }
       }
       throw new RestException(HttpStatus.NOT_FOUND, "The requested resource was not found");

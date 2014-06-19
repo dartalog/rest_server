@@ -9,10 +9,11 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:logging/logging.dart';
 
+part 'src/_a_rest_content_type_negotiator.dart';
+
 part 'src/rest_request.dart';
 part 'src/rest_exception.dart';
 part 'src/rest_server.dart';
-part 'src/_rest_content_types.dart';
 part 'src/rest_resource.dart';
 
 const HTTP_GET = "GET";
@@ -21,5 +22,4 @@ const HTTP_OPTIONS = "OPTIONS";
 
 
 typedef Future RestResourceMethodHandler(RestRequest request);
-typedef Future<List<ContentType>> ManualAvailableContentTypes(RestRequest request);
-typedef Future<List<ContentType>> ManualAcceptableContentTypes(RestRequest request);
+typedef Future<List<ContentType>> ManualContentTypeProvider(RestRequest request);
