@@ -1,8 +1,12 @@
 part of rest;
 
 class RestRequest {
+  
+  final Logger _log = new Logger('RestRequest');
+  
   HttpRequest httpRequest;
   ContentType requestedContentType;
+  AcceptCollection acceptableContentTypes;
   String path;
   Map<String, String> args;
   String method;
@@ -18,6 +22,9 @@ class RestRequest {
     this.args = this.httpRequest.uri.queryParameters;
     this.dataContentType = this.httpRequest.headers.contentType;
     this.method = this.httpRequest.method;
+    
+    // Break down the accept request
+    acceptableContentTypes = new AcceptCollection(this.httpRequest.headers.value("Accept"));
   }
   
   Future loadData() {

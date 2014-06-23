@@ -4,7 +4,7 @@ part of rest;
 abstract class _ARestContentTypeNegotiator {
   Map<String,List<ContentType>> _availableContentTypes = new Map<String,List<ContentType>>();
   Map<String,List<ContentType>> _acceptableContentTypes = new Map<String,List<ContentType>>();
-  Map<String,ContentType> _defaultAvailable = null;
+  Map<String,ContentType> _defaultAvailable = new Map<String,ContentType>();
 
   ManualContentTypeProvider manualAvailableContentTypes = null;
   ManualContentTypeProvider manualAcceptableContentTypes = null;
@@ -88,8 +88,10 @@ abstract class _ARestContentTypeNegotiator {
     }
 
    
+    
     Future _handleAvailableContentTypes(RestRequest request) {
       return new Future.sync(() {
+        
         
         
       });
