@@ -1,4 +1,4 @@
-/// Server-side library to automate the minutia of create a REST API.
+/// Server-side library to automate the minutia of creating a REST API.
 /// Uses event handlers and Futures.
 /// .
 
@@ -7,6 +7,7 @@ library rest;
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:collection';
 import 'package:logging/logging.dart';
 
 part 'src/http/http_method.dart';

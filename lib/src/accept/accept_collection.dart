@@ -1,42 +1,67 @@
 part of rest;
 
-class AcceptCollection {
+class AcceptCollection  {
   final Logger _log = new Logger('AcceptCollection');
 
-  Map<double, AcceptSubCollection> acceptContentTypes = new Map<double, AcceptSubCollection>();
+  final List<AThingToAccept> items = new List<AThingToAccept>();
 
   static const String _ACCEPT_HEADER_REGEX = "([^,;]+)((;[^;^,]+)*)";
   static final RegExp _acceptHeaderRegexp = new RegExp(_ACCEPT_HEADER_REGEX);
 
-  AcceptCollection(String accept_header) {
-    Iterable<Match> matches = _acceptHeaderRegexp.allMatches(accept_header);
-    if (matches.length > 0) {
-      for (Match match in matches) {
-        // Group 1 should be the request
-        // Group 2 should be the arguments
-
-        String content_type = match.group(1);
-       
-        if (match.group(2).trim() != "") {
-          AThingToAccept thing = new AcceptContentType(match.group(2));
+  AcceptCollection(String header_name, HttpRequest request) {
+    for (String header in request.headers[header_name]) {
+      for (String value in header.split(",")) {
+        AThingToAccept thing;
+        switch (header_name) {
+          case HttpHeaders.ACCEPT:
+            thing = new AcceptContentType(value);
+            break;
+          default:
+            this._log.warning("Header not known: ${header_name}");
+            continue;
         }
-
-        if(!this.acceptContentTypes.containsKey(quality)) {
-          AcceptSubCollection sub = new AcceptSubCollection();
-          this.acceptContentTypes[quality] = sub;
-           
-        }
-        
-        this._log.info("Accept quality ${quality}: ${content_type}");
+        this.items.add(thing);
       }
     }
+    this.items.sort();
 
+    for(AThingToAccept thing in this.items) {
+      this._log.info(thing.toString());
+      
+    }
+    // Now, we 
+    
+    //    Iterable<Match> matches = _acceptHeaderRegexp.allMatches(accept_header);
+    //    if (matches.length > 0) {
+    //      for (Match match in matches) {
+    //        // Group 1 should be the request
+    //        // Group 2 should be the arguments
+    //
+    //        //String content_type = match.group(1);
+    //
+    //        if (match.group(2).trim() != "") {
+    //          AThingToAccept thing;
+    //          switch(header_name) {
+    //            case HttpHeaders.ACCEPT:
+    //              thing = new AcceptContentType(match.group(0));
+    //              break;
+    //            default:
+    //              this._log.warning("Header not known: ${header_name}");
+    //              continue;
+    //          }
+    //
+    //
+    //
+    //          if(!this.acceptContentTypes.containsKey(thing.quality)) {
+    //            AcceptSubCollection sub = new AcceptSubCollection();
+    //            this.acceptContentTypes[thing.quality] = sub;
+    //
+    //          }
+    //
+    //        }
+    //
+    //      }
+    //}
   }
-}
-
-class AcceptSubCollection {
-  List<String> fullyQualified = new List<String>();
-  List<String> partlyQualified = new List<String>();
-  List<String> notQualified = new List<String>();
-
+  
 }

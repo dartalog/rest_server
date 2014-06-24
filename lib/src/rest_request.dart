@@ -30,7 +30,7 @@ class RestRequest {
   
   RestRequest(this._server, this.httpRequest) {
     // Break down the accept request
-    acceptableContentTypes = new AcceptCollection(this.httpRequest.headers.value(HttpHeaders.ACCEPT));
+    acceptableContentTypes = new AcceptCollection(HttpHeaders.ACCEPT,this.httpRequest);
   }
   
   Future loadData() {

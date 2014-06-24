@@ -88,10 +88,34 @@ abstract class _ARestContentTypeNegotiator {
     }
 
    
+    ContentType _findAvailableContentType(AcceptContentType requested_type) {
+      
+    }
     
     Future _handleAvailableContentTypes(RestRequest request) {
+      List<ContentType> available_types = new List<ContentType>();
       return new Future.sync(() {
+        if(request.acceptableContentTypes.items.length == 0) { // No requested type
+          if(this._defaultAvailable.containsKey(request.method)) {
+            return this._defaultAvailable.containsKey(request.method);
+          } else if(this._defaultAvailable.containsKey(request.method)) {
+            return this._defaultAvailable.containsKey(request.method);
+          } else {
+            throw new RestException(HttpStatus.NOT_ACCEPTABLE,"No Accept header present, and the server is not configured to provide a default data type");
+          }
+        }
+
         
+        
+        if(this._availableContentTypes.containsKey(request.method)) {
+          available_types.addAll(this._availableContentTypes[request.method]);
+        }
+        if(this.manualAvailableContentTypes!=null) {
+          return this.manualAvailableContentTypes(request).then((result) {
+            available_types.addAll(result);
+          });
+        }
+      }).then((_) {
         
         
       });
