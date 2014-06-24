@@ -1,9 +1,6 @@
 part of rest;
 
 class RestResource extends _ARestContentTypeNegotiator {
-
-  String method;
-
   RegExp _regex;
 
   RestServer _server;
@@ -24,13 +21,13 @@ class RestResource extends _ARestContentTypeNegotiator {
 
   void _sendAllowedMethods(HttpResponse response) {
     StringBuffer methods = new StringBuffer();
-    methods.write("OPTIONS");
+    methods.write(HttpMethod.OPTIONS);
     for (String method in this._handlers.keys) {
       methods.write(",");
       methods.write(method);
     }
 
-    response.headers.add("Allow", methods.toString());
+    response.headers.add(HttpHeaders.ALLOW, methods.toString());
     response.headers.add("Access-Control-Allow-Methods", methods.toString());
   }
 
@@ -44,7 +41,7 @@ class RestResource extends _ARestContentTypeNegotiator {
   Future<String> _trigger(RestRequest request) {
     return new Future.sync(() {
       this._sendAllowedMethods(request.httpRequest.response);
-      if (request.httpRequest.method == HTTP_OPTIONS) {
+      if (request.httpRequest.method == HttpMethod.OPTIONS) {
         return null;
       }
      

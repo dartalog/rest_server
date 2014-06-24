@@ -17,7 +17,7 @@ class RestServer extends _ARestContentTypeNegotiator {
 
     HttpServer.bind(address, port).then((server) {
       this._log.info("Serving at ${server.address}:${server.port}");
-      server.listen(_AnswerRequest);
+      server.listen(_answerRequest);
     });
   }
   
@@ -26,7 +26,7 @@ class RestServer extends _ARestContentTypeNegotiator {
     resource._server = this;
   }
 
-  void _AnswerRequest(HttpRequest http_request) {
+  void _answerRequest(HttpRequest http_request) {
     Stopwatch stopwatch = new Stopwatch()..start();
     StringBuffer output = new StringBuffer();
     Future fut = new Future.sync(() {

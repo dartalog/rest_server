@@ -11,14 +11,14 @@ abstract class _ARestContentTypeNegotiator {
 
   bool _ignoreGlobalContentTypes = false;
 
-  static String _GLOBAL_METHOD = "GLOBAL";
+  static const String _GLOBAL_METHOD = "GLOBAL";
   
-  void addDefaultAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
+  void addDefaultAvailableContentType(ContentType type, [String method = _GLOBAL_METHOD]) {
     this._defaultAvailable[method] = type;
     this.addAvailableContentType(type,method);
   }
 
-  void addAvailableContentType(ContentType type, [String method = "GLOBAL"]) {
+  void addAvailableContentType(ContentType type, [String method = _GLOBAL_METHOD]) {
     if(!this._availableContentTypes.containsKey(method)) {
       this._availableContentTypes[method] = new List<ContentType>();
     }
@@ -28,7 +28,7 @@ abstract class _ARestContentTypeNegotiator {
     }
   }
   
-  void addAcceptableContentType(ContentType type, [String method = "GLOBAL"]) {
+  void addAcceptableContentType(ContentType type, [String method = _GLOBAL_METHOD]) {
     if(!this._acceptableContentTypes.containsKey(method)) {
       this._acceptableContentTypes[method] = new List<ContentType>();
     }

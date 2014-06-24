@@ -1,30 +1,36 @@
 part of rest;
 
 class RestRequest {
-  
   final Logger _log = new Logger('RestRequest');
+  final HttpRequest httpRequest;  
+  final RestServer _server;
   
-  HttpRequest httpRequest;
-  ContentType requestedContentType;
-  AcceptCollection acceptableContentTypes;
-  String path;
-  Map<String, String> args;
-  String method;
+  String get method {
+    return this.httpRequest.method;
+  }
+  String get path {
+    return this.httpRequest.uri.path;
+  }
+  Map<String, String> get args { 
+    return this.httpRequest.uri.queryParameters;
+  }
 
-  RestServer _server;
   
-  ContentType dataContentType;
+  ContentType get requestedContentType {
+    return this.httpRequest.response.headers.contentType;
+  }
+
+  ContentType get dataContentType {
+    return this.httpRequest.headers.contentType;
+  }
+
+  AcceptCollection acceptableContentTypes;
+
   List<int> data = new List<int>();
   
   RestRequest(this._server, this.httpRequest) {
-    this.requestedContentType = this.httpRequest.response.headers.contentType;
-    this.path = this.httpRequest.uri.path;
-    this.args = this.httpRequest.uri.queryParameters;
-    this.dataContentType = this.httpRequest.headers.contentType;
-    this.method = this.httpRequest.method;
-    
     // Break down the accept request
-    acceptableContentTypes = new AcceptCollection(this.httpRequest.headers.value("Accept"));
+    acceptableContentTypes = new AcceptCollection(this.httpRequest.headers.value(HttpHeaders.ACCEPT));
   }
   
   Future loadData() {
@@ -33,7 +39,7 @@ class RestRequest {
       this.data.addAll(buffer);
     }, onDone: () {
       if(this.data.length>0 && this.dataContentType == null) {
-        completer.completeError(new RestException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,"No Content-Type was specified"));        
+        completer.completeError(new RestException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,"No ${HttpHeaders.CONTENT_TYPE} was specified"));        
       } else {
         completer.complete();
       }
