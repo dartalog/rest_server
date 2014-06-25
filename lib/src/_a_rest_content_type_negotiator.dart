@@ -11,7 +11,7 @@ abstract class _ARestContentTypeNegotiator {
   ManualContentTypeProvider manualAvailableContentTypes = null;
   ManualContentTypeProvider manualAcceptableContentTypes = null;
 
-  bool _ignoreGlobalContentTypes = false;
+  bool ignoreGlobalContentTypes = false;
   RestServer _rest_server;
 
   static const String _GLOBAL_METHOD = "GLOBAL";
@@ -59,8 +59,11 @@ abstract class _ARestContentTypeNegotiator {
             return this.manualAcceptableContentTypes(request);
           }
         }).then((List<ContentType> manual_types) {
+          ContentType type = null;
           // Check against the manual content types
-          ContentType type = _findMatchingContentType(manual_types, request.dataContentType, false);
+          if(manual_types!=null) {
+            type =_findMatchingContentType(manual_types, request.dataContentType, false);
+          }
 
           // Check against the resource's method-specific content types
           if (type == null && this._acceptableContentTypes.containsKey(request.method)) {
@@ -83,7 +86,7 @@ abstract class _ARestContentTypeNegotiator {
           }
 
           if (type == null) {
-            throw new RestException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported content type");
+            throw new RestException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported content type: " + request.dataContentType.toString());
           }
         });
       }
@@ -96,9 +99,9 @@ abstract class _ARestContentTypeNegotiator {
       return this._defaultAvailable[method];
     } else if (this._defaultAvailable.containsKey(_GLOBAL_METHOD)) {
       return this._defaultAvailable[_GLOBAL_METHOD];
-    } else if (this._rest_server._defaultAvailable.containsKey(method)) {
+    } else if (!this.ignoreGlobalContentTypes&&this._rest_server._defaultAvailable.containsKey(method)) {
       return this._rest_server._defaultAvailable[method];
-    } else if (this._rest_server._defaultAvailable.containsKey(_GLOBAL_METHOD)) {
+    } else if (!this.ignoreGlobalContentTypes&&this._rest_server._defaultAvailable.containsKey(_GLOBAL_METHOD)) {
       return this._rest_server._defaultAvailable[_GLOBAL_METHOD];
     } else {
       return null;
@@ -111,6 +114,8 @@ abstract class _ARestContentTypeNegotiator {
     List<ContentType> available_types = new List<ContentType>();
 
     return new Future.sync(() {
+      
+      
       if (request.acceptableContentTypes.items.length == 0) { // No requested type
         output = _findDefaultContentType(request.method, new AcceptContentType("*/*"));
         if (output == null) {
@@ -134,7 +139,7 @@ abstract class _ARestContentTypeNegotiator {
         });
       }
     }).then((_) { 
-        if(!this._ignoreGlobalContentTypes) {
+        if(!this.ignoreGlobalContentTypes) {
           if (this._rest_server._availableContentTypes.containsKey(request.method)) {
             available_types.addAll(this._rest_server._availableContentTypes[request.method]);
           }
@@ -142,12 +147,17 @@ abstract class _ARestContentTypeNegotiator {
             available_types.addAll(this._rest_server._availableContentTypes[_GLOBAL_METHOD]);
           }
         }
+        
+        if(available_types.length==0) {
+          throw new RestException(HttpStatus.INTERNAL_SERVER_ERROR,"There are no content types configured for this resource via this method");
+        }
 
+        
         for (AcceptContentType requested_type in request.acceptableContentTypes.items) {
           if(requested_type.qualification<=AThingToAccept._PARTIALLY_QUALIFIED) {
             output = _findDefaultContentType(request.method, requested_type);
-            this._a_log.info("${requested_type.toString()} matched against ${output.toString()}");
             if(output!=null) {
+              this._a_log.info("${requested_type.toString()} matched against ${output.toString()}");
               break;
             }
           }
@@ -165,7 +175,7 @@ abstract class _ARestContentTypeNegotiator {
         }
         
         if (output == null) {
-          throw new RestException(HttpStatus.NOT_ACCEPTABLE, "No Accept header found, and no default content type has been specified on the server");
+          throw new RestException(HttpStatus.NOT_ACCEPTABLE, "No content type matching the Accept header is available");
         } else {
           request.requestedContentType = output;
           return output;
@@ -205,6 +215,7 @@ abstract class _ARestContentTypeNegotiator {
   }
 
   static ContentType _findMatchingContentType(List<ContentType> ct_pool, ContentType req_ct, bool allow_wildcards) {
+    
     for (ContentType ct in ct_pool) {
       if ((!allow_wildcards || req_ct.primaryType != "*") && req_ct.primaryType != ct.primaryType) {
         continue;

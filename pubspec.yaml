@@ -7,3 +7,5 @@ environment:
   sdk: 1.4.3
 dependencies:
   logging: '>=0.9.1+1 <0.10.0'
+  mime: any
+  path: any

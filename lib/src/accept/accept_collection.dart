@@ -10,6 +10,9 @@ class AcceptCollection  {
 
   AcceptCollection(String header_name, HttpRequest request) {
     for (String header in request.headers[header_name]) {
+      if(_isNullOrEmpty(header)) {
+        continue;
+      }
       for (String value in header.split(",")) {
         AThingToAccept thing;
         switch (header_name) {

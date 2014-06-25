@@ -8,7 +8,9 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 import 'dart:collection';
+import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
+import 'package:mime/mime.dart' as mime;
 
 part 'src/http/http_method.dart';
 
@@ -22,6 +24,16 @@ part 'src/rest_request.dart';
 part 'src/rest_exception.dart';
 part 'src/rest_server.dart';
 part 'src/rest_resource.dart';
+part 'src/rest_static_file_resource.dart';
 
 typedef Future RestResourceMethodHandler(RestRequest request);
 typedef Future<List<ContentType>> ManualContentTypeProvider(RestRequest request);
+
+
+bool _isNullOrEmpty(String value) {
+  if(value==null || value.trim() == "") {
+    return true;
+  } else {
+    return false;
+  }
+}
