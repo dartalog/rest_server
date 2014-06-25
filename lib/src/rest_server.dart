@@ -24,6 +24,7 @@ class RestServer extends _ARestContentTypeNegotiator {
   void addResource(RestResource resource) {
     this._resources.add(resource);
     resource._server = this;
+    resource._rest_server = this;
   }
 
   void _answerRequest(HttpRequest http_request) {

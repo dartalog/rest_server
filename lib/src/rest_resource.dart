@@ -38,7 +38,7 @@ class RestResource extends _ARestContentTypeNegotiator {
     });
   }
   
-  Future<String> _trigger(RestRequest request) {
+  Future _trigger(RestRequest request) {
     return new Future.sync(() {
       this._sendAllowedMethods(request.httpRequest.response);
       if (request.httpRequest.method == HttpMethod.OPTIONS) {
@@ -50,15 +50,16 @@ class RestResource extends _ARestContentTypeNegotiator {
       }
       
       return request.loadData().then((_) {
+        return this._handleContentTypes(request);
+      }).then((_) {
         return this._handlers[request.httpRequest.method](request).then((result) {
           if (result == null) {
             return "";
           } else {
-            return result.toString();
+            return result;
           }
         });
       });
     });
   }
-  
 }

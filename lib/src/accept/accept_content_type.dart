@@ -38,4 +38,16 @@ class AcceptContentType extends AThingToAccept<AcceptContentType> {
 
     return 0;
   }
+  
+  bool matches(ContentType type) {
+    if(type.subType == this.contentType.subType || this.contentType.subType == "*") {
+      if(type.primaryType == this.contentType.primaryType || this.contentType.primaryType == "*") {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
 }

@@ -25,10 +25,6 @@ class AcceptCollection  {
     }
     this.items.sort();
 
-    for(AThingToAccept thing in this.items) {
-      this._log.info(thing.toString());
-      
-    }
     // Now, we 
     
     //    Iterable<Match> matches = _acceptHeaderRegexp.allMatches(accept_header);

@@ -19,6 +19,9 @@ class RestRequest {
   ContentType get requestedContentType {
     return this.httpRequest.response.headers.contentType;
   }
+  void set requestedContentType(ContentType type) {
+    this.httpRequest.response.headers.contentType = type;
+  }
 
   ContentType get dataContentType {
     return this.httpRequest.headers.contentType;
