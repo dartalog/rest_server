@@ -49,4 +49,8 @@ class RestRequest {
     });
     return completer.future;
   }
+  
+  String getDataAsString() {
+    return new String.fromCharCodes(this.data);
+  }
 }

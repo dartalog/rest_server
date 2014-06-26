@@ -10,7 +10,7 @@ class RestServer extends _ARestContentTypeNegotiator {
     this._log.info("Rest server instance created");
   }
 
-  void start([InternetAddress address = null, int port = 8080]) {
+  void start({InternetAddress address: null, int port: 8080}) {
 
     if (address == null) {
       address = InternetAddress.LOOPBACK_IP_V4;

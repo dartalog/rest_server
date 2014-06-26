@@ -29,7 +29,6 @@ part 'src/rest_static_file_resource.dart';
 typedef Future RestResourceMethodHandler(RestRequest request);
 typedef Future<List<ContentType>> ManualContentTypeProvider(RestRequest request);
 
-
 bool _isNullOrEmpty(String value) {
   if(value==null || value.trim() == "") {
     return true;
