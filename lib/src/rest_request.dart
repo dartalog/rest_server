@@ -29,7 +29,7 @@ class RestRequest {
 
   AcceptCollection acceptableContentTypes;
 
-  List<int> data = new List<int>();
+  BytesBuilder data = new BytesBuilder();
   
   RestRequest(this._server, this.httpRequest) {
     // Break down the accept request
@@ -39,7 +39,7 @@ class RestRequest {
   Future loadData() {
     Completer completer = new Completer();
     this.httpRequest.listen((List<int> buffer) {
-      this.data.addAll(buffer);
+      this.data.add(buffer);
     }, onDone: () {
       if(this.data.length>0 && this.dataContentType == null) {
         completer.completeError(new RestException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,"No ${HttpHeaders.CONTENT_TYPE} was specified"));        
@@ -51,6 +51,6 @@ class RestRequest {
   }
   
   String getDataAsString() {
-    return new String.fromCharCodes(this.data);
+    return convert.UTF8.decode(this.data.takeBytes());
   }
 }

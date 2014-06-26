@@ -93,7 +93,7 @@ class RestServer extends _ARestContentTypeNegotiator {
     }
     response.headers.contentType = ContentType.JSON;
     
-    return JSON.encode(output);
+    return convert.JSON.encode(output);
   }
   
   Future determineContentType() {

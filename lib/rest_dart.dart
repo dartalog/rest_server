@@ -5,7 +5,7 @@
 library rest;
 
 import 'dart:io';
-import 'dart:convert';
+import 'dart:convert' as convert;
 import 'dart:async';
 import 'dart:collection';
 import 'package:path/path.dart' as path;
