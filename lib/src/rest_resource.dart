@@ -15,8 +15,11 @@ class RestResource extends _ARestContentTypeNegotiator {
     this._handlers[method] = handler;
   }
 
-  bool _matches(String resource) {
-    return this._regex.hasMatch(resource);
+  Match _matches(String resource) {
+    if(this._regex.hasMatch(resource)) {
+      return this._regex.firstMatch(resource);
+    }
+    return null;
   }
 
   void _sendAllowedMethods(HttpResponse response) {
@@ -40,6 +43,7 @@ class RestResource extends _ARestContentTypeNegotiator {
   
   Future _trigger(RestRequest request) {
     return new Future.sync(() {
+      
       this._sendAllowedMethods(request.httpRequest.response);
       if (request.httpRequest.method == HttpMethod.OPTIONS) {
         return null;

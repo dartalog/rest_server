@@ -4,6 +4,7 @@ class RestRequest {
   final Logger _log = new Logger('RestRequest');
   final HttpRequest httpRequest;  
   final RestServer _server;
+  Match regexMatch = null;
   
   String get method {
     return this.httpRequest.method;

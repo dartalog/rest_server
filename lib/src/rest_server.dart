@@ -36,7 +36,9 @@ class RestServer extends _ARestContentTypeNegotiator {
       RestRequest request = new RestRequest(this,http_request);
       
       for (RestResource resource in this._resources) {
-        if (resource._matches(http_request.uri.path)) {
+        Match match = resource._matches(http_request.uri.path); 
+        if (match!=null) {
+          request.regexMatch = match;
           return resource._trigger(request);
         }
       }
