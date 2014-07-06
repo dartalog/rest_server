@@ -26,6 +26,8 @@ part 'src/rest_server.dart';
 part 'src/rest_resource.dart';
 part 'src/rest_static_file_resource.dart';
 
+const String _GLOBAL_METHOD = "GLOBAL";
+
 typedef Future RestResourceMethodHandler(RestRequest request);
 typedef Future<List<ContentType>> ManualContentTypeProvider(RestRequest request);
 

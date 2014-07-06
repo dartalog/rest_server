@@ -14,8 +14,6 @@ abstract class _ARestContentTypeNegotiator {
   bool ignoreGlobalContentTypes = false;
   RestServer _rest_server;
 
-  static const String _GLOBAL_METHOD = "GLOBAL";
-
   void addDefaultAvailableContentType(ContentType type, [String method = _GLOBAL_METHOD]) {
     this._defaultAvailable[method] = type;
     this.addAvailableContentType(type, method);
