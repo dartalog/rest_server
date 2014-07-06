@@ -36,7 +36,8 @@ class RestStaticFileResource extends RestResource {
     if(!_isNullOrEmpty(this._path)) {
       file_path = path.join(file_path,this._path);
     }
-    file_path = path.join(file_path,match.group(1));
+    
+    file_path = path.join(file_path,adjustFilePath(match.group(1)));
     
     File file = new File(file_path);
     
@@ -45,6 +46,10 @@ class RestStaticFileResource extends RestResource {
     }
 
     return file;
+  }
+  
+  String adjustFilePath(String filename) {
+    return filename;
   }
   
   ContentType _getFileContentType(File file) {
