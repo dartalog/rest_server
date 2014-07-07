@@ -38,7 +38,7 @@ class RestStaticFileResource extends RestResource {
     }
     
     file_path = path.join(file_path,adjustFilePath(match.group(1)));
-    
+    this._rsf_log.info("Checking for file: ${file_path}");
     File file = new File(file_path);
     
     if(!file.existsSync()) {
