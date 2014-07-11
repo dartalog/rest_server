@@ -4,7 +4,8 @@ class RestRequest {
   final Logger _log = new Logger('RestRequest');
   final HttpRequest httpRequest;  
   final RestServer _server;
-  final Map<String, RestRange> ranges = new Map<String, RestRange>();
+  
+  RestRange range = null;
   
   RestResponse response;
   
@@ -36,17 +37,18 @@ class RestRequest {
     return this.httpRequest.headers.contentType;
   }
 
-  
   RestRequest(this._server, this.httpRequest) {
     // Break down the accept request
     acceptableContentTypes = new AcceptCollection(HttpHeaders.ACCEPT,this.httpRequest);
     this.response = new RestResponse(this.httpRequest.response);
     
-    
-    String ranges = this.httpRequest.headers.value(HttpHeaders.RANGE);
+    String range_header = this.httpRequest.headers.value(HttpHeaders.RANGE);
+    if(!_isNullOrEmpty(range_header)) {
+      this.range = new RestRange._fromRangeHeader(range_header);
+    }
   }
   
-  Future loadData() {
+  Future _loadData() {
     Completer completer = new Completer();
     this.httpRequest.listen((List<int> buffer) {
       this.data.add(buffer);

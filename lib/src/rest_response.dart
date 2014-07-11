@@ -2,7 +2,12 @@ part of rest;
 
 class RestResponse {
   final HttpResponse httpResponse;
-  final Map<String,RestRange> ranges = new Map<String,RestRange>();
+  RestRange _range = null;
   
   RestResponse(this.httpResponse);
+  
+  void setRange(String name, int start, int end, int total) {
+    this._range = new RestRange._fromValues(name, start, end, total);
+  }
+  
 }

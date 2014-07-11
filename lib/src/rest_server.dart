@@ -1,13 +1,16 @@
 part of rest;
 
 class RestServer extends _ARestContentTypeNegotiator {
-  List<RestResource> _resources = new List<RestResource>();
+  final List<RestResource> _resources = new List<RestResource>();
+  
+  static final Logger _log = new Logger('RestServer');
 
+  String accessControlAllowOrigin = null;
+  String accessControlAllowHeaders = null;
 
-  final Logger _log = new Logger('RestServer');
   
   RestServer() {
-    this._log.info("Rest server instance created");
+    _log.info("Rest server instance created");
   }
 
   void start({InternetAddress address: null, int port: 8080}) {
@@ -17,7 +20,7 @@ class RestServer extends _ARestContentTypeNegotiator {
     }
 
     HttpServer.bind(address, port).then((server) {
-      this._log.info("Serving at ${server.address}:${server.port}");
+      _log.info("Serving at ${server.address}:${server.port}");
       server.listen(_answerRequest);
     });
   }
@@ -32,8 +35,9 @@ class RestServer extends _ARestContentTypeNegotiator {
     Stopwatch stopwatch = new Stopwatch()..start();
     StringBuffer string_output = new StringBuffer();
     List<int> binary_output = new List<int>();
+    RestRequest request;
     Future fut = new Future.sync(() {
-      RestRequest request = new RestRequest(this,http_request);
+      request = new RestRequest(this,http_request);
       
       for (RestResource resource in this._resources) {
         Match match = resource._matches(http_request.uri.path); 
@@ -52,27 +56,37 @@ class RestServer extends _ARestContentTypeNegotiator {
         }
       }
     }).catchError((e, st) {
-      this._log.severe(e.toString(), e, st);
+      _log.severe(e.toString(), e, st);
       string_output.write(this._processError(http_request.response, e, st));
     }).whenComplete(() {
       // Last chance to write a header, so we write the processing time
       http_request.response.headers.add("X-Processing-Time", stopwatch.elapsed.toString());
-      http_request.response.headers.add("Access-Control-Allow-Origin", "*");
-      http_request.response.headers.add("Access-Control-Allow-Headers", "Content-Type");
+      if(!_isNullOrEmpty(this.accessControlAllowOrigin)) {
+        http_request.response.headers.add(AccessHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, 
+                                            this.accessControlAllowOrigin);
+      }
+      if(!_isNullOrEmpty(this.accessControlAllowHeaders)) {
+        http_request.response.headers.add(AccessHeaders.ACCESS_CONTROL_ALLOW_HEADERS, 
+                                            this.accessControlAllowHeaders);
+      }
+      
+      if (http_request.response.statusCode ==  HttpStatus.OK) {
+        if(request.range!=null) {
+          http_request.response.statusCode = HttpStatus.PARTIAL_CONTENT;
+        }
+      }
       
       if (binary_output.length == 0 && string_output.length == 0) { 
         // If the content length is 0, and if the current status code is 200, then we send a 204
         if (http_request.response.statusCode ==  HttpStatus.OK) {
           http_request.response.statusCode = HttpStatus.NO_CONTENT;
         }
-      } else {
-        if(binary_output.length > 0) {
+      } else if(binary_output.length > 0) {
           http_request.response.contentLength = binary_output.length;
           http_request.response.add(binary_output);
-        } else {
+      } else {
           http_request.response.contentLength = string_output.length;
           http_request.response.write(string_output);
-        }
       }
       http_request.response.close();
       stopwatch.stop();

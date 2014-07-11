@@ -13,6 +13,7 @@ import 'package:logging/logging.dart';
 import 'package:mime/mime.dart' as mime;
 
 part 'src/http/http_method.dart';
+part 'src/http/access_headers.dart';
 
 part 'src/_a_rest_content_type_negotiator.dart';
 

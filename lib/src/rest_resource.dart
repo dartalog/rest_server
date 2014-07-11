@@ -2,10 +2,10 @@ part of rest;
 
 class RestResource extends _ARestContentTypeNegotiator {
   RegExp _regex;
-
   RestServer _server;
 
-  Map<String, RestResourceMethodHandler> _handlers = new Map<String, RestResourceMethodHandler>();
+  final Map<String, RestResourceMethodHandler> _handlers = new Map<String, RestResourceMethodHandler>();
+  final List<String> _acceptRanges = new List<String>();
   
   RestResource(String regex) {
     _regex = new RegExp(regex);
@@ -15,6 +15,10 @@ class RestResource extends _ARestContentTypeNegotiator {
     this._handlers[method] = handler;
   }
 
+  void addAcceptRange(String name) {
+    this._acceptRanges.add(name);
+  }
+  
   Match _matches(String resource) {
     if(this._regex.hasMatch(resource)) {
       return this._regex.firstMatch(resource);
@@ -31,7 +35,7 @@ class RestResource extends _ARestContentTypeNegotiator {
     }
 
     response.headers.add(HttpHeaders.ALLOW, methods.toString());
-    response.headers.add("Access-Control-Allow-Methods", methods.toString());
+    response.headers.add(AccessHeaders.ACCESS_CONTROL_ALLOW_METHODS, methods.toString());
   }
 
   
@@ -45,18 +49,36 @@ class RestResource extends _ARestContentTypeNegotiator {
     return new Future.sync(() {
       
       this._sendAllowedMethods(request.httpRequest.response);
+      
       if (request.httpRequest.method == HttpMethod.OPTIONS) {
         return null;
+      }
+      
+      for(String range in this._acceptRanges) {
+        request.response.httpResponse.headers.add(HttpHeaders.ACCEPT_RANGES, range);
       }
      
       if (!this._handlers.containsKey(request.httpRequest.method)) {
         throw new RestException(HttpStatus.METHOD_NOT_ALLOWED, "The method " + request.httpRequest.method + " is not allowed for this resource");
       }
       
-      return request.loadData().then((_) {
+      if(request.range!=null) {
+        if(this._acceptRanges.length==0) {
+          throw new RestException(HttpStatus.BAD_REQUEST,"The Range header is not supported for this resource");
+        } else if(!this._acceptRanges.contains(request.range.name)) {
+          throw new RestException(HttpStatus.BAD_REQUEST,"The requested range is not supported");
+        }
+      }
+      
+      return request._loadData().then((_) {
         return this._handleContentTypes(request);
       }).then((_) {
         return this._handlers[request.httpRequest.method](request).then((result) {
+          
+          if(request.response._range!=null) {
+            request.response._range._setResponseHeaders(request.httpRequest);
+          }
+          
           if (result == null) {
             return "";
           } else {
