@@ -4,8 +4,16 @@ class RestRequest {
   final Logger _log = new Logger('RestRequest');
   final HttpRequest httpRequest;  
   final RestServer _server;
+  final Map<String, RestRange> ranges = new Map<String, RestRange>();
+  
+  RestResponse response;
+  
   Match regexMatch = null;
   
+  AcceptCollection acceptableContentTypes;
+
+  BytesBuilder data = new BytesBuilder();
+
   String get method {
     return this.httpRequest.method;
   }
@@ -15,11 +23,11 @@ class RestRequest {
   Map<String, String> get args { 
     return this.httpRequest.uri.queryParameters;
   }
-
   
   ContentType get requestedContentType {
     return this.httpRequest.response.headers.contentType;
   }
+  
   void set requestedContentType(ContentType type) {
     this.httpRequest.response.headers.contentType = type;
   }
@@ -28,13 +36,14 @@ class RestRequest {
     return this.httpRequest.headers.contentType;
   }
 
-  AcceptCollection acceptableContentTypes;
-
-  BytesBuilder data = new BytesBuilder();
   
   RestRequest(this._server, this.httpRequest) {
     // Break down the accept request
     acceptableContentTypes = new AcceptCollection(HttpHeaders.ACCEPT,this.httpRequest);
+    this.response = new RestResponse(this.httpRequest.response);
+    
+    
+    String ranges = this.httpRequest.headers.value(HttpHeaders.RANGE);
   }
   
   Future loadData() {

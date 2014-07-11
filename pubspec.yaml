@@ -1,10 +1,10 @@
-name: rest_dart
+name: rest_server
 version: 0.1.2
 author: Matthew Barbour <sanmadjack@gmail.com>
-description: A library for automating much of the minutia of creating a rest interface
-homepage: https://github.com/sanmadjack/rest_dart
+description: A dart library for automating much of the minutia of creating a rest server
+homepage: https://github.com/sanmadjack/rest_server
 environment:
-  sdk: 1.5.2
+  sdk: 1.5.3
 dependencies:
   logging: any
   mime: any

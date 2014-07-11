@@ -21,6 +21,8 @@ part 'src/accept/accept_content_type.dart';
 part 'src/accept/accept_collection.dart';
 
 part 'src/rest_request.dart';
+part 'src/rest_response.dart';
+part 'src/rest_range.dart';
 part 'src/rest_exception.dart';
 part 'src/rest_server.dart';
 part 'src/rest_resource.dart';
