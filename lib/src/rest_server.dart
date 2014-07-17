@@ -7,7 +7,7 @@ class RestServer extends _ARestContentTypeNegotiator {
 
   String accessControlAllowOrigin = null;
   String accessControlAllowHeaders = null;
-
+  String accessControlExposeHeaders = null;
   
   RestServer() {
     _log.info("Rest server instance created");
@@ -68,6 +68,10 @@ class RestServer extends _ARestContentTypeNegotiator {
       if(!_isNullOrEmpty(this.accessControlAllowHeaders)) {
         http_request.response.headers.add(AccessHeaders.ACCESS_CONTROL_ALLOW_HEADERS, 
                                             this.accessControlAllowHeaders);
+      }
+      if(!_isNullOrEmpty(this.accessControlExposeHeaders)) {
+        http_request.response.headers.add(AccessHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, 
+                                            this.accessControlExposeHeaders);
       }
       
       if (http_request.response.statusCode ==  HttpStatus.OK) {
