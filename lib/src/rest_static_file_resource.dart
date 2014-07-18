@@ -38,7 +38,7 @@ class RestStaticFileResource extends RestResource {
     }
     
     file_path = path.join(file_path,adjustFilePath(match.group(1)));
-    this._rsf_log.info("Checking for file: ${file_path}");
+    this._rsf_log.fine("Checking for file: ${file_path}");
     File file = new File(file_path);
     
     if(!file.existsSync()) {
@@ -61,7 +61,7 @@ class RestStaticFileResource extends RestResource {
     if(str_mime==null) {
       str_mime = "text/plain";
     }
-    this._rsf_log.info("Determined file '${file.path}' is of mimetype '${str_mime}");
+    this._rsf_log.fine("Determined file '${file.path}' is of mimetype '${str_mime}");
     return ContentType.parse(str_mime);
   }
   
