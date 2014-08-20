@@ -1,5 +1,6 @@
 part of rest;
 
+/// Access-Control-related HTTP headers, as defined at [http://www.w3.org/TR/cors/].
 abstract class AccessHeaders {
   static const String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
   static const String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";

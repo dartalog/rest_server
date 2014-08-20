@@ -1,18 +1,27 @@
 part of rest;
-
+/**
+ * An object to manage range requests via the [HttpHeaders.ACCEPT_RANGE] header 
+ * and responses via the [HttpHeaders.CONTENT_RANGE] header.
+ */
 class RestRange {
-  static final Logger _log = new Logger('RestRange');
-  String name;
-  int start;
-  int end;
-  int total;
-
-  int get count  {
-    return end - start + 1;
-  }
-  
   static const String _RANGE_REGEXP_STRING = r"([^=]+)=(\d+)-(\d+)";
   static final RegExp _RANGE_REGEXP = new RegExp(_RANGE_REGEXP_STRING);
+  static final Logger _log = new Logger('RestRange');
+  
+  /// The name of the range type, for example "files" or 'bytes".
+  String name;
+  /// The start position of the range.
+  int start;
+  /// The end position of the range.
+  int end;
+  /// The total units available, sent out automatically as part of [HttpHeaders.CONTENT_RANGE].
+  int total;
+
+  /// The total units contained within the range.
+  int get count  {
+    return end - start + 1;
+    
+  }
 
   RestRange._fromValues(this.name, this.start, this.end, this.total) {
     if(_isNullOrEmpty(name)) {

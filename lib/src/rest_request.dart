@@ -1,10 +1,17 @@
 part of rest;
 
+/**
+ * An object representing a request made to the REST server.
+ * 
+ * Basically a glorified [HttpRequest] wrapper that provides additional functionality.
+ */
 class RestRequest {
   final Logger _log = new Logger('RestRequest');
-  final HttpRequest httpRequest;  
   final RestServer _server;
-  
+
+  /// The [HttpRequest] that spawned this [RestRequest].
+  final HttpRequest httpRequest;  
+  /// The [RestRange] of this request, created from the [HttpHeaders.ACCEPT_RANGE] header of this request.
   RestRange range = null;
   
   RestResponse response;
@@ -62,6 +69,9 @@ class RestRequest {
     return completer.future;
   }
   
+  /**
+   * Returns the data from 
+   */
   String getDataAsString() {
     return convert.UTF8.decode(this.data.takeBytes());
   }

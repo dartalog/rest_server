@@ -116,8 +116,6 @@ class RestServer extends _ARestContentTypeNegotiator {
     return convert.JSON.encode(output);
   }
   
-  Future determineContentType() {
-    
-  }
+
 
 }
