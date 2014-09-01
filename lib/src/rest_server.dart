@@ -36,7 +36,7 @@ class RestServer extends _ARestContentTypeNegotiator {
     StringBuffer string_output = new StringBuffer();
     List<int> binary_output = new List<int>();
     RestRequest request;
-    Future fut = new Future.sync(() {
+    Future fut = new Future(() {
       request = new RestRequest(this,http_request);
       
       for (RestResource resource in this._resources) {

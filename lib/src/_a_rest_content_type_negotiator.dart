@@ -49,9 +49,9 @@ abstract class _ARestContentTypeNegotiator {
   }
 
   Future _checkAcceptableContentTypes(RestRequest request) {
-    return new Future.sync(() {
+    return new Future(() {
       if (request.data.length > 0) { // If there is data submitted (we check for the presence of a content-type in RestRequest)
-        return new Future.sync(() {
+        return new Future(() {
           // Check the manual provider first
           if (this.manualAcceptableContentTypes != null) {
             return this.manualAcceptableContentTypes(request);
@@ -104,14 +104,13 @@ abstract class _ARestContentTypeNegotiator {
     } else {
       return null;
     }
-
   }
 
   Future _handleAvailableContentTypes(RestRequest request) {
     ContentType output = null;
     List<ContentType> available_types = new List<ContentType>();
 
-    return new Future.sync(() {
+    return new Future(() {
       
       
       if (request.acceptableContentTypes.items.length == 0) { // No requested type

@@ -40,13 +40,13 @@ class RestResource extends _ARestContentTypeNegotiator {
 
   
   Future _processHeaders(RestRequest request) {
-    return new Future.sync(() {
+    return new Future(() {
       
     });
   }
   
   Future _trigger(RestRequest request) {
-    return new Future.sync(() {
+    return new Future(() {
       
       this._sendAllowedMethods(request.httpRequest.response);
       

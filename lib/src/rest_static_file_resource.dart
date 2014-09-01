@@ -13,7 +13,7 @@ class RestStaticFileResource extends RestResource {
   
   Future<List<ContentType>> _manualAvailableContentTypes(RestRequest request) {
     List<ContentType> output = new List<ContentType>();
-    return new Future.sync(() {
+    return new Future(() {
       File file = _findFile(request);
       ContentType type = _getFileContentType(file);
       output.add(type);
@@ -66,7 +66,7 @@ class RestStaticFileResource extends RestResource {
   }
   
   Future _getMethod(RestRequest request) {
-    return new Future.sync(() {
+    return new Future(() {
       File file = this._findFile(request);
       return file.readAsBytes();
     });
