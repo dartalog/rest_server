@@ -14,15 +14,17 @@ class RestServer extends _ARestContentTypeNegotiator {
   }
 
   void start({InternetAddress address: null, int port: 8080}) {
-
-    if (address == null) {
-      address = InternetAddress.LOOPBACK_IP_V4;
-    }
-
-    HttpServer.bind(address, port).then((server) {
-      _log.info("Serving at ${server.address}:${server.port}");
-      server.listen(_answerRequest);
-    });
+    runZoned(() {
+      if (address == null) {
+        address = InternetAddress.LOOPBACK_IP_V4;
+      }
+  
+      HttpServer.bind(address, port).then((server) {
+        _log.info("Serving at ${server.address}:${server.port}");
+        server.listen(_answerRequest);
+      });
+    },
+    onError: (e, stackTrace) => _log.severe("Uncaught Exception: " + e.toString(), stackTrace));
   }
   
   void addResource(RestResource resource) {
