@@ -73,7 +73,11 @@ class RestResource extends _ARestContentTypeNegotiator {
       return request._loadData().then((_) {
         return this._handleContentTypes(request);
       }).then((_) {
-        return this._handlers[request.httpRequest.method](request).then((result) {
+        Future fut = this._handlers[request.httpRequest.method](request);
+        if(fut==null) {
+          throw new RestException(HttpStatus.INTERNAL_SERVER_ERROR,"Request handler did not return a Future");
+        }
+        return fut.then((result) {
           
           if(request.response._range!=null) {
             request.response._range._setResponseHeaders(request.httpRequest);
