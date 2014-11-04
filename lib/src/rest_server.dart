@@ -61,17 +61,20 @@ class RestServer extends _ARestContentTypeNegotiator {
       _log.severe(e.toString(), e, st);
       string_output.write(this._processError(http_request.response, e, st));
     }).whenComplete(() {
-      // Last chance to write a header, so we write the processing time
-      http_request.response.headers.add("X-Processing-Time", stopwatch.elapsed.toString());
+      _log.info("Writing headers");
+      
       if(!_isNullOrEmpty(this.accessControlAllowOrigin)) {
+        _log.info("Setting ${AccessHeaders.ACCESS_CONTROL_ALLOW_ORIGIN} header to \"${this.accessControlAllowOrigin}\"");
         http_request.response.headers.add(AccessHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, 
                                             this.accessControlAllowOrigin);
       }
       if(!_isNullOrEmpty(this.accessControlAllowHeaders)) {
+        _log.info("Setting ${AccessHeaders.ACCESS_CONTROL_ALLOW_HEADERS} header to \"${this.accessControlAllowHeaders}\"");
         http_request.response.headers.add(AccessHeaders.ACCESS_CONTROL_ALLOW_HEADERS, 
                                             this.accessControlAllowHeaders);
       }
       if(!_isNullOrEmpty(this.accessControlExposeHeaders)) {
+        _log.info("Setting ${AccessHeaders.ACCESS_CONTROL_EXPOSE_HEADERS} header to \"${this.accessControlExposeHeaders}\"");
         http_request.response.headers.add(AccessHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, 
                                             this.accessControlExposeHeaders);
       }
@@ -82,20 +85,31 @@ class RestServer extends _ARestContentTypeNegotiator {
         }
       }
       
+      // Last chance to write a header, so we write the processing time
+      http_request.response.headers.add("X-Processing-Time", stopwatch.elapsed.toString());
+
+      _log.info("Done writing headers");
+      
       if (binary_output.length == 0 && string_output.length == 0) { 
         // If the content length is 0, and if the current status code is 200, then we send a 204
         if (http_request.response.statusCode ==  HttpStatus.OK) {
           http_request.response.statusCode = HttpStatus.NO_CONTENT;
         }
       } else if(binary_output.length > 0) {
+          _log.info("Writing binary output, total length: ${binary_output.length}");
           http_request.response.contentLength = binary_output.length;
           http_request.response.add(binary_output);
       } else {
+          _log.info("Writing string output, total length: ${string_output.length}");
           http_request.response.contentLength = string_output.length;
           http_request.response.write(string_output);
       }
+      _log.info("Response complete, closing");
       http_request.response.close();
       stopwatch.stop();
+      _log.info("Response closed");
+      _log.info("Response Code: ${http_request.response.statusCode}");
+      _log.info("Total processing time: ${stopwatch.elapsed.toString()}");
     });
   }
 
