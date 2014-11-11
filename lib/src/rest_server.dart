@@ -48,7 +48,7 @@ class RestServer extends _ARestContentTypeNegotiator {
           return resource._trigger(request);
         }
       }
-      throw new RestException(HttpStatus.NOT_FOUND, "The requested resource was not found");
+      throw new RestException(HttpStatus.NOT_FOUND, "The requested resource was not found: ${http_request.uri.path}");
     }).then((data) {
       if (data != null) {
         if(data is List<int>) {
@@ -90,6 +90,10 @@ class RestServer extends _ARestContentTypeNegotiator {
 
       _log.info("Done writing headers");
       
+      if(http_request.method==HttpMethod.HEAD) {
+        _log.info("HEAD requested, not outputting content");
+      } 
+      
       if (binary_output.length == 0 && string_output.length == 0) { 
         // If the content length is 0, and if the current status code is 200, then we send a 204
         if (http_request.response.statusCode ==  HttpStatus.OK) {
@@ -98,12 +102,17 @@ class RestServer extends _ARestContentTypeNegotiator {
       } else if(binary_output.length > 0) {
           _log.info("Writing binary output, total length: ${binary_output.length}");
           http_request.response.contentLength = binary_output.length;
-          http_request.response.add(binary_output);
+          if(http_request.method!=HttpMethod.HEAD) {
+            http_request.response.add(binary_output);
+          }
       } else {
           _log.info("Writing string output, total length: ${string_output.length}");
           http_request.response.contentLength = string_output.length;
-          http_request.response.write(string_output);
+          if(http_request.method!=HttpMethod.HEAD) {
+            http_request.response.write(string_output);
+          }
       }
+
       _log.info("Response complete, closing");
       http_request.response.close();
       stopwatch.stop();

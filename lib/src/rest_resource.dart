@@ -32,6 +32,10 @@ class RestResource extends _ARestContentTypeNegotiator {
     for (String method in this._handlers.keys) {
       methods.write(",");
       methods.write(method);
+      if(method==HttpMethod.GET) {
+        methods.write(",");
+        methods.write(HttpMethod.HEAD);
+      }
     }
 
     response.headers.add(HttpHeaders.ALLOW, methods.toString());
@@ -47,19 +51,26 @@ class RestResource extends _ARestContentTypeNegotiator {
   
   Future _trigger(RestRequest request) {
     return new Future(() {
-      
+      String method = request.httpRequest.method;
       this._sendAllowedMethods(request.httpRequest.response);
       
-      if (request.httpRequest.method == HttpMethod.OPTIONS) {
+      if (method == HttpMethod.OPTIONS) {
         return null;
       }
+      
+      bool headers_only = false;
+      if (method == HttpMethod.HEAD) {
+        headers_only = true;
+        method = HttpMethod.GET;
+      }
+
       
       for(String range in this._acceptRanges) {
         request.response.httpResponse.headers.add(HttpHeaders.ACCEPT_RANGES, range);
       }
      
-      if (!this._handlers.containsKey(request.httpRequest.method)) {
-        throw new RestException(HttpStatus.METHOD_NOT_ALLOWED, "The method " + request.httpRequest.method + " is not allowed for this resource");
+      if (!this._handlers.containsKey(method)) {
+        throw new RestException(HttpStatus.METHOD_NOT_ALLOWED, "The method ${request.httpRequest.method} is not allowed for this resource");
       }
       
       if(request.range!=null) {
@@ -73,7 +84,7 @@ class RestResource extends _ARestContentTypeNegotiator {
       return request._loadData().then((_) {
         return this._handleContentTypes(request);
       }).then((_) {
-        Future fut = this._handlers[request.httpRequest.method](request);
+        Future fut = this._handlers[method](request);
         if(fut==null) {
           throw new RestException(HttpStatus.INTERNAL_SERVER_ERROR,"Request handler did not return a Future");
         }
