@@ -9,6 +9,8 @@ class RestServer extends _ARestContentTypeNegotiator {
   String accessControlAllowHeaders = null;
   String accessControlExposeHeaders = null;
   
+  bool outputStackTrace = true;
+  
   RestServer() {
     _log.info("Rest server instance created");
   }
@@ -59,7 +61,7 @@ class RestServer extends _ARestContentTypeNegotiator {
       }
     }).catchError((e, st) {
       _log.severe(e.toString(), e, st);
-      string_output.write(this._processError(http_request.response, e, st));
+      string_output.write(this._outputError(http_request, e, st));
     }).whenComplete(() {
       _log.info("Writing headers");
       
@@ -122,25 +124,57 @@ class RestServer extends _ARestContentTypeNegotiator {
     });
   }
 
-  String _processError(HttpResponse response, Object e, [StackTrace st = null]) {
+  String _outputError(HttpRequest request, Object e, [StackTrace st = null]) {
+    if (e is RestException) {
+      request.response.statusCode = e.Code;
+    } else {
+      request.response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+    
+    return _outputErrorAsJSON(request.response, e, st);
+  }
+  
+  String _outputErrorAsHTML(HttpResponse response, Object e, [StackTrace st = null]) {
+    StringBuffer output = new StringBuffer();
+    output.writeln("<!DOCTYPE html>");
+    output.writeln("<html><head><meta charset=\"UTF-8\"><title>${response.statusCode} - ${e.toString()}</title></head><body><details>");
+    output.writeln("<summary>${response.statusCode} - ${e.toString()}</summary>");
+    if (outputStackTrace && st != null) {
+      output.writeln("<p>${st.toString()}</p>");
+    }
+    response.headers.contentType = ContentType.HTML;
+    
+    output.writeln("</details></html>");
+    return output.toString();
+  }
+
+  
+  String _outputErrorAsText(HttpResponse response, Object e, [StackTrace st = null]) {
+    StringBuffer output = new StringBuffer();
+
+    output.writeln("Status Code: ${response.statusCode}");
+    output.writeln("Error: ${e.toString()}");
+    if (outputStackTrace && st != null) {
+      output.writeln("Stack Trace:\n ${st.toString()}");
+    }
+    response.headers.contentType = ContentType.TEXT;
+    
+    return output.toString();
+  }
+
+  
+  String _outputErrorAsJSON(HttpResponse response, Object e, [StackTrace st = null]) {
     Map<String, Object> output = new Map<String, Object>();
 
     output["message"] = e.toString();
-    if (e is RestException) {
-      response.statusCode = e.Code;
-      output["code"] = e.Code;
-    } else {
-      response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-      output["code"] = HttpStatus.INTERNAL_SERVER_ERROR;
-    }
-    if (st != null) {
+    output["code"] = response.statusCode;
+
+    if (outputStackTrace && st != null) {
       output["stack_trace"] = st.toString();
     }
     response.headers.contentType = ContentType.JSON;
     
     return convert.JSON.encode(output);
   }
-  
-
 
 }
