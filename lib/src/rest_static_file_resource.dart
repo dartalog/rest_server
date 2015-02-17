@@ -11,17 +11,15 @@ class RestStaticFileResource extends RestResource {
     this.manualAvailableContentTypes = _manualAvailableContentTypes;
   }
   
-  Future<List<ContentType>> _manualAvailableContentTypes(RestRequest request) {
+  Future<List<ContentType>> _manualAvailableContentTypes(RestRequest request) async {
     List<ContentType> output = new List<ContentType>();
-    return new Future(() {
-      File file = _findFile(request);
-      ContentType type = _getFileContentType(file);
-      output.add(type);
-      return output;
-    });
+    File file = _findFile(request);
+    ContentType type = _getFileContentType(file);
+    output.add(type);
+    return output;
   }
   
-  File _findFile(RestRequest request) {
+  File _findFile(RestRequest request) async {
     Match match = this._regex.firstMatch(request.httpRequest.uri.path);
     if(match.groupCount == 0) {
       throw new RestException(HttpStatus.INTERNAL_SERVER_ERROR,"RestStaticFileResource regex does not contain a group");
@@ -41,7 +39,7 @@ class RestStaticFileResource extends RestResource {
     this._rsf_log.fine("Checking for file: ${file_path}");
     File file = new File(file_path);
     
-    if(!file.existsSync()) {
+    if(await file.exists() ==  false) {
       throw new RestException(HttpStatus.NOT_FOUND,"The requested resource was not found");
     }
 
@@ -52,11 +50,11 @@ class RestStaticFileResource extends RestResource {
     return filename;
   }
   
-  ContentType _getFileContentType(File file) {
-    RandomAccessFile ra_file = file.openSync(mode: FileMode.READ);
+  ContentType _getFileContentType(File file) async {
+    RandomAccessFile ra_file = await file.open(mode: FileMode.READ);
     List<int> buffer = new List<int>(mime.defaultMagicNumbersMaxLength);
-    ra_file.readIntoSync(buffer,0,mime.defaultMagicNumbersMaxLength);
-    ra_file.closeSync();
+    await ra_file.readInto(buffer,0,mime.defaultMagicNumbersMaxLength);
+    await ra_file.close();
     String str_mime = mime.lookupMimeType(file.path, headerBytes: buffer);
     if(str_mime==null) {
       str_mime = "text/plain";
@@ -65,11 +63,9 @@ class RestStaticFileResource extends RestResource {
     return ContentType.parse(str_mime);
   }
   
-  Future _getMethod(RestRequest request) {
-    return new Future(() {
-      File file = this._findFile(request);
-      return file.readAsBytes();
-    });
+  Future<List<int>> _getMethod(RestRequest request) async {
+    File file = this._findFile(request);
+    return file.readAsBytes();
   }
 
 

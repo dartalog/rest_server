@@ -35,23 +35,28 @@ class RestServer extends _ARestContentTypeNegotiator {
     resource._rest_server = this;
   }
 
-  void _answerRequest(HttpRequest http_request) {
+  _answerRequest(HttpRequest http_request) async {
     Stopwatch stopwatch = new Stopwatch()..start();
     StringBuffer string_output = new StringBuffer();
     List<int> binary_output = new List<int>();
     RestRequest request;
-    Future fut = new Future(() {
-      request = new RestRequest(this,http_request);
+    try {
       
+      request = new RestRequest(this,http_request);
+        
+      dynamic data;
       for (RestResource resource in this._resources) {
         Match match = resource._matches(http_request.uri.path); 
         if (match!=null) {
           request.regexMatch = match;
-          return resource._trigger(request);
+          data = await resource._trigger(request);
+          break;
         }
       }
-      throw new RestException(HttpStatus.NOT_FOUND, "The requested resource was not found: ${http_request.uri.path}");
-    }).then((data) {
+      if (request.regexMatch==null) {
+        throw new RestException(HttpStatus.NOT_FOUND, "The requested resource was not found: ${http_request.uri.path}");
+      }
+    
       if (data != null) {
         if(data is List<int>) {
           binary_output.addAll(data);
@@ -59,10 +64,10 @@ class RestServer extends _ARestContentTypeNegotiator {
           string_output.write(data);
         }
       }
-    }).catchError((e, st) {
+    } catch(e, st) {
       _log.severe(e.toString(), e, st);
       string_output.write(this._outputError(http_request, e, st));
-    }).whenComplete(() {
+    } finally {
       _log.info("Writing headers");
       
       if(!_isNullOrEmpty(this.accessControlAllowOrigin)) {
@@ -121,7 +126,7 @@ class RestServer extends _ARestContentTypeNegotiator {
       _log.info("Response closed");
       _log.info("Response Code: ${http_request.response.statusCode}");
       _log.info("Total processing time: ${stopwatch.elapsed.toString()}");
-    });
+    }
   }
 
   String _outputError(HttpRequest request, Object e, [StackTrace st = null]) {
