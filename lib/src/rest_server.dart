@@ -36,6 +36,9 @@ class RestServer extends _ARestContentTypeNegotiator {
   }
 
   _answerRequest(HttpRequest http_request) async {
+    String request_resource = http_request.requestedUri.toString();
+    _log.info("REST request received: $request_resource");
+    
     Stopwatch stopwatch = new Stopwatch()..start();
     StringBuffer string_output = new StringBuffer();
     List<int> binary_output = new List<int>();
