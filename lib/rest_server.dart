@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:path/path.dart' as path;
 import 'package:logging/logging.dart';
 import 'package:mime/mime.dart' as mime;
+import 'package:stack_trace/stack_trace.dart';
 
 part 'src/http/http_method.dart';
 part 'src/http/access_headers.dart';

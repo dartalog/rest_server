@@ -3,9 +3,8 @@ version: 0.1.2
 author: Matthew Barbour <sanmadjack@gmail.com>
 description: A dart library for automating much of the minutia of creating a rest server
 homepage: https://github.com/sanmadjack/rest_server
-environment:
-  sdk: 1.8.5
 dependencies:
   logging: any
   mime: any
   path: any
+  stack_trace: any

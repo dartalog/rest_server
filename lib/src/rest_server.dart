@@ -10,6 +10,7 @@ class RestServer extends _ARestContentTypeNegotiator {
   String accessControlExposeHeaders = null;
   
   bool outputStackTrace = true;
+  bool outputTerseStackTraces = true;
   
   RestServer() {
     _log.info("Rest server instance created");
@@ -26,7 +27,7 @@ class RestServer extends _ARestContentTypeNegotiator {
         server.listen(_answerRequest);
       });
     },
-    onError: (e, stackTrace) => _log.severe("Uncaught Exception: " + e.toString(), stackTrace));
+    onError: (e, stackTrace) => _log.severe("Uncaught Exception: " + e.toString(), e, stackTrace));
   }
   
   void addResource(RestResource resource) {
@@ -148,7 +149,7 @@ class RestServer extends _ARestContentTypeNegotiator {
     output.writeln("<html><head><meta charset=\"UTF-8\"><title>${response.statusCode} - ${e.toString()}</title></head><body><details>");
     output.writeln("<summary>${response.statusCode} - ${e.toString()}</summary>");
     if (outputStackTrace && st != null) {
-      output.writeln("<p>${st.toString()}</p>");
+      output.writeln("<p>${Trace.format(st, terse: outputTerseStackTraces)}</p>");
     }
     response.headers.contentType = ContentType.HTML;
     
@@ -163,7 +164,7 @@ class RestServer extends _ARestContentTypeNegotiator {
     output.writeln("Status Code: ${response.statusCode}");
     output.writeln("Error: ${e.toString()}");
     if (outputStackTrace && st != null) {
-      output.writeln("Stack Trace:\n ${st.toString()}");
+      output.writeln("Stack Trace:\n ${Trace.format(st, terse: outputTerseStackTraces)}");
     }
     response.headers.contentType = ContentType.TEXT;
     
@@ -178,7 +179,7 @@ class RestServer extends _ARestContentTypeNegotiator {
     output["code"] = response.statusCode;
 
     if (outputStackTrace && st != null) {
-      output["stack_trace"] = st.toString();
+      output["stack_trace"] = Trace.format(st, terse: outputTerseStackTraces);
     }
     response.headers.contentType = ContentType.JSON;
     
